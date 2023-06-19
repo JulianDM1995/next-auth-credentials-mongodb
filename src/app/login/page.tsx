@@ -1,10 +1,32 @@
 "use client";
-import { FormEvent, useState } from "react";
-import { signIn, useSession } from "next-auth/react";
+import { FormEvent, useEffect, useState } from "react";
+import {
+  ClientSafeProvider,
+  LiteralUnion,
+  getProviders,
+  signIn,
+  useSession,
+} from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { BuiltInProviderType } from "next-auth/providers";
+
+type SessionProviders = Record<
+  LiteralUnion<BuiltInProviderType, string>,
+  ClientSafeProvider
+> | null;
 
 function LoginPage() {
   const [error, setError] = useState("");
+  const [providers, setProviders] = useState<SessionProviders>();
+
+  useEffect(() => {
+    const setTheProviders = async () => {
+      const setupProviders = await getProviders();
+      setProviders(setupProviders);
+    };
+    setTheProviders();
+  }, []);
+
   const router = useRouter();
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -22,7 +44,7 @@ function LoginPage() {
   };
 
   return (
-    <div className="justify-center h-[calc(100vh-4rem)] flex items-center">
+    <div className="justify-center h-[calc(100vh-4rem)] flex flex-col items-center">
       <form
         onSubmit={handleSubmit}
         className="bg-neutral-950 px-8 py-10 w-3/12"
@@ -50,6 +72,33 @@ function LoginPage() {
           Login
         </button>
       </form>
+      <div className="flex">
+        {providers?.google && (
+          <button
+            onClick={() =>
+              signIn(providers.google.id, {
+                callbackUrl: `${window.location.origin}/dashboard/profile`,
+              })
+            }
+            className="bg-blue-500 text-white px-4 py-2 block mt-4"
+          >
+            Google
+          </button>
+        )}
+
+        {providers?.github && (
+          <button
+            onClick={() =>
+              signIn(providers.github.id, {
+                callbackUrl: `${window.location.origin}/dashboard/profile`,
+              })
+            }
+            className="bg-blue-500 text-white px-4 py-2 block mt-4"
+          >
+            Github
+          </button>
+        )}
+      </div>
     </div>
   );
 }
