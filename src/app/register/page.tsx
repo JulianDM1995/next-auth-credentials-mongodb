@@ -4,8 +4,8 @@ import axios, { AxiosError } from "axios";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
-function Signup() {
-  const [error, setError] = useState();
+function RegisterPage() {
+  const [error, setError] = useState("");
   const router = useRouter();
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -15,16 +15,21 @@ function Signup() {
       const signupResponse = await axios.post("/api/auth/signup", {
         email: formData.get("email"),
         password: formData.get("password"),
-        fullname: formData.get("fullname"),
+        name: formData.get("name"),
       });
       console.log(signupResponse);
+      
       const res = await signIn("credentials", {
         email: signupResponse.data.email,
         password: formData.get("password"),
         redirect: false,
+        callbackUrl: "/dashboard/profile",
       });
 
-      if (res?.ok) return router.push("/dashboard/profile");
+      if (!res) return setError("Sign in failed");
+      if (res.error) setError(res.error as string);
+      else router.push("/dashboard/profile");
+
     } catch (error) {
       console.log(error);
       if (error instanceof AxiosError) {
@@ -40,12 +45,12 @@ function Signup() {
         {error && <div className="bg-red-500 text-white p-2 mb-2">{error}</div>}
         <h1 className="text-4xl font-bold mb-7">Signup</h1>
 
-        <label className="text-slate-300">Fullname:</label>
+        <label className="text-slate-300">name:</label>
         <input
           type="text"
-          placeholder="Fullname"
+          placeholder="name"
           className="bg-zinc-800 px-4 py-2 block mb-2 w-full"
-          name="fullname"
+          name="name"
         />
 
         <label className="text-slate-300">Email:</label>
@@ -72,4 +77,4 @@ function Signup() {
   );
 }
 
-export default Signup;
+export default RegisterPage;

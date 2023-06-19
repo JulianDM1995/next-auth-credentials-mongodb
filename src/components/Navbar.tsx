@@ -1,9 +1,9 @@
+"use client";
+import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
-import { getServerSession } from "next-auth";
 
-async function Navbar() {
-  const session = await getServerSession();
-
+export const Navbar = () => {
+  const { status } = useSession();
   return (
     <nav className="bg-zinc-900 p-4">
       <div className="container mx-auto flex justify-between">
@@ -12,7 +12,7 @@ async function Navbar() {
         </Link>
 
         <ul className="flex gap-x-2">
-          {session ? (
+          {status === "authenticated" ? (
             <>
               <li className="px-3 py-1">
                 <Link href="/dashboard/profile">Perfil</Link>
@@ -24,7 +24,7 @@ async function Navbar() {
                 <Link href="/about">About</Link>
               </li>
               <li className="bg-indigo-500 px-3 py-1">
-                <Link href="/">Login</Link>
+                <Link href="/login">Login</Link>
               </li>
               <li className="bg-indigo-700 px-3 py-1">
                 <Link href="/register">Register</Link>
@@ -35,6 +35,4 @@ async function Navbar() {
       </div>
     </nav>
   );
-}
-
-export default Navbar;
+};

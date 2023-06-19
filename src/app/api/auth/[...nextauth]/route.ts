@@ -26,7 +26,7 @@ const handler = NextAuth({
           userFound.password
         );
 
-        if (!passwordMatch) throw new Error("Invalid credentials");
+        if (!passwordMatch) throw new Error("Wrong password");
 
         console.log(userFound);
 
